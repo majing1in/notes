@@ -112,7 +112,7 @@ private void set(ThreadLocal<?> key, Object value) {
 }
 ```
 
-#### 3. replaceStaleEntry方法(替换陈旧的key)
+#### 3. replaceStaleEntry替换陈旧的key
 
 ```java
 private void replaceStaleEntry(ThreadLocal<?> key, Object value, int staleSlot) {
@@ -120,20 +120,23 @@ private void replaceStaleEntry(ThreadLocal<?> key, Object value, int staleSlot) 
     int len = tab.length;
     Entry e;
     int slotToExpunge = staleSlot;
-    // 向前环形搜索，找出遇到的第一个被回收的ThreadLocal对象
+    // 向前环形搜索，寻找是否存在被回收的key
     for (int i = prevIndex(staleSlot, len); (e = tab[i]) != null; i = prevIndex(i, len))
         if (e.get() == null)
             slotToExpunge = i;
-    // 向后环形搜索
+    // 向后环形搜索，寻找因为hash冲突而后移并且是相同的key，替换回原有位置
+    // 保证一个数组中不存在相同的两个key
     for (int i = nextIndex(staleSlot, len); (e = tab[i]) != null; i = nextIndex(i, len)) {
         ThreadLocal<?> k = e.get();
-        // 线性探测解决hash冲突，向后探索找到如果被后移的key就将它替换到当前位置
+        // 找到被hash冲突后移的key，交换回原位
         if (k == key) {
             e.value = value;
             tab[i] = tab[staleSlot];
             tab[staleSlot] = e;
             if (slotToExpunge == staleSlot)
                 slotToExpunge = i;
+            // 删除被清理的key，调整后续key的位置
+            // 重被清理放回的位置开始局部扫描清理
             cleanSomeSlots(expungeStaleEntry(slotToExpunge), len);
             return;
         }
@@ -148,18 +151,19 @@ private void replaceStaleEntry(ThreadLocal<?> key, Object value, int staleSlot) 
 }
 ```
 
-#### 4. expungeStaleEntry方法(删除陈旧的key)
+#### 4. expungeStaleEntry删除陈旧的key
 
 ```java
 private int expungeStaleEntry(int staleSlot) {
     Entry[] tab = table;
     int len = tab.length;
+    // 当前的key已经被清理了，直接置空
     tab[staleSlot].value = null;
     tab[staleSlot] = null;
     size--;
     Entry e;
     int i;
-    // i = (e = tab[i]) != null
+    // 向后探索，寻找是否存在已经被清理的key，当遇到第一个为null的entry则返回下标
     for (i = nextIndex(staleSlot, len); (e = tab[i]) != null; i = nextIndex(i, len)) {
         ThreadLocal<?> k = e.get();
         // 删除已经被回收的key
@@ -168,10 +172,12 @@ private int expungeStaleEntry(int staleSlot) {
             tab[i] = null;
             size--;
         } else {
-            // 重新计算ThreadLocalHashCode放入到新位置
-            int h = k.threadLocalHashCode & (len - 1);
+            // 原本在数组中的位置
+            int h = k.threadLocalHashCode & (len - 1);、
+            // 因为hash冲突导致位置发生变化，将当前所在位置清理，重新寻找空位放入
             if (h != i) {
                 tab[i] = null;
+                // 最好情况回归原位，否则向后探索空位并放入
                 while (tab[h] != null)
                     h = nextIndex(h, len);
                 tab[h] = e;
@@ -182,7 +188,7 @@ private int expungeStaleEntry(int staleSlot) {
 }
 ```
 
-#### 5. cleanSomeSlots方法(清理为空的key)
+#### 5. cleanSomeSlots清理为空的key
 
 ```java
 private boolean cleanSomeSlots(int i, int n) {
@@ -190,9 +196,10 @@ private boolean cleanSomeSlots(int i, int n) {
     Entry[] tab = table;
     int len = tab.length;
     do {
+        // 向后探索清理被回收的key
         i = nextIndex(i, len);
         Entry e = tab[i];
-        // 找出被清理的key
+        // 找出被清理的key，找到了则重新从i位置继续探索，并重置扫描次数
         if (e != null && e.get() == null) {
             // 重置扫描次数
             n = len;
@@ -200,11 +207,116 @@ private boolean cleanSomeSlots(int i, int n) {
             // 删除陈旧的key，返回扫描位置
             i = expungeStaleEntry(i);
         }
-        // 限制扫描次数
+        // 限制扫描次数(范围)
     } while ((n >>>= 1) != 0);
     return removed;
 }
 ```
 
+#### 6. getEntry方法
 
+```java
+private Entry getEntry(ThreadLocal<?> key) {
+    // 获取应在所在数组的下标
+    int i = key.threadLocalHashCode & (table.length - 1);
+    Entry e = table[i];
+    // 找到直接放回entry
+    if (e != null && e.get() == key)
+        return e;
+    else
+        // 向后探索寻找目标并返回
+        return getEntryAfterMiss(key, i, e);
+}
+```
+
+#### 7. getEntryAfterMiss方法
+
+```java
+private Entry getEntryAfterMiss(ThreadLocal<?> key, int i, Entry e) {
+    Entry[] tab = table;
+    int len = tab.length;
+    // 向后探索，因为是遇到hash冲入会向后寻找空位并放入
+    // 如果后一位被清理，会删除当前位置，重写计算后面不为null的key的位置
+    while (e != null) {
+        ThreadLocal<?> k = e.get();
+        if (k == key)
+            return e;
+        if (k == null)
+            // 有被清理的key进行删除，并会调整后续key的位置
+            expungeStaleEntry(i);
+        else
+            i = nextIndex(i, len);
+        e = tab[i];
+    }
+    return null;
+}
+```
+
+#### 8. rehash方法
+
+```java
+private void rehash() {
+    // 删除数组中已经被回收的key
+    expungeStaleEntries();
+    // 实际保存容量达到数组一半时进行扩容 1/2
+    if (size >= threshold - threshold / 4)
+        resize();
+}
+```
+
+#### 9. expungeStaleEntries删除过时的条目
+
+```java
+private void expungeStaleEntries() {
+    Entry[] tab = table;
+    int len = tab.length;
+    // 全局扫描删除被回收的key
+    for (int j = 0; j < len; j++) {
+        Entry e = tab[j];
+        if (e != null && e.get() == null)
+            expungeStaleEntry(j);
+    }
+}
+```
+
+#### 10. resize扩容方法
+
+```java
+private void resize() {
+    Entry[] oldTab = table;
+    int oldLen = oldTab.length;
+    // 扩容原有的2倍
+    int newLen = oldLen * 2;
+    Entry[] newTab = new Entry[newLen];
+    int count = 0;
+    // 对原有数组进行全局扫描
+    for (int j = 0; j < oldLen; ++j) {
+        Entry e = oldTab[j];
+        if (e != null) {
+            ThreadLocal<?> k = e.get();
+            if (k == null) {
+                e.value = null; 
+            } else {
+                // 计算在新数组中的位置
+                int h = k.threadLocalHashCode & (newLen - 1);
+                // 发生hash冲入向后探索放入
+                while (newTab[h] != null)
+                    h = nextIndex(h, newLen);
+                newTab[h] = e;
+                count++;
+            }
+        }
+    }
+    // 设置阈值
+    setThreshold(newLen);
+    size = count;
+    table = newTab;
+}
+```
+
+## 五、ThreadLocal弱引用设计
+
+
+
+## 六、内存泄漏原因
 
