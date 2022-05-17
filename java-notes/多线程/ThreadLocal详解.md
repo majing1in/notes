@@ -316,7 +316,19 @@ private void resize() {
 
 ## 五、ThreadLocal弱引用设计
 
+https://zhuanlan.zhihu.com/p/139214244
 
+![ThreadLocal_1](D:\notes\java-notes\资源\ThreadLocal_1.png)
 
-## 六、内存泄漏原因
+总的来说Threadlocal的设计是对线程本地变量的操作，将线程本地变量与维护的关系进行了分离，直接使用定义的ThreadLocal即可，所以Thread没有直接对ThreadlocalMap操作的方法；
+
+ThreadLocalMap是线程局部变量，生命周期与线程一致，当线程销毁ThreadLocalMap也会一并销毁；
+
+ThreadLocalMap本身并没有为外界提供取出和存放数据的API，我们所能获得数据的方式只有通过ThreadLocal类提供的API来间接的从ThreadLocalMap取出数据，当我们用不了ThreadLocal对象的API也就无法从ThreadLocalMap里取出指定的数据；
+
+如果ThreadLocal在entry中是强引用，即使ThreadLocal Ref被置为空，根据GC Root进行扫描规则，依旧存在一条从entry.key指向ThreadLocal的强引用，但是Thread无法直接操作ThreadLocalMap，只有线程结束才能正确的释放；
+
+而如果使用弱引用当ThreadLocal Ref被置为空，entry.key就没有了直接关联的强引用对象，进行垃圾回收的时候会被回收掉，当key被回收了，就可以利用key是否为null进行对entry的删除。
+
+## 六、ThreadLocal内存泄漏原因
 
