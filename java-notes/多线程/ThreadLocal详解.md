@@ -85,6 +85,14 @@ ThreadLocalMap(ThreadLocal<?> firstKey, Object firstValue) {
 
 #### 2. set方法
 
+获取在数组中的位置，判断当前位置是否为空，如果不为空则发生了hash冲突
+
+进入方法中判断当前key与当前位置上的key是否是同一个，如果是则更新value，如果当前位置的key为null，可以判断已经被会后或者已确定不再使用，会对它进行回收；
+
+如果当前key并不是同一个，则会向后探索空位，然后进行插入；
+
+最后会清理一些未使用的槽位，判断是否需要扩容。
+
 ```java
 private void set(ThreadLocal<?> key, Object value) {
     Entry[] tab = table;
@@ -113,6 +121,16 @@ private void set(ThreadLocal<?> key, Object value) {
 ```
 
 #### 3. replaceStaleEntry替换陈旧的key
+
+在set方法中插入时，当前数组上的key存在但是已经被清理了，会进行替换；
+
+首先从当前位置staleSlot向前进行环形搜索，直到遇到entry中的空位置停下，记录下标slotToExpunge；
+
+从staleSlot向后环形搜索，对每一个数组上的key进行判断，如果之前有相同key放入了数组，但是因为hash冲突而导致了后移，需要将它换回到原位，防止同一个数组中存在两个相同的key；
+
+如果确实已存在key替换完成后，对数组进行清理；
+
+不存在则清空当前位置的value，并将新的key放入到当前位置。
 
 ```java
 private void replaceStaleEntry(ThreadLocal<?> key, Object value, int staleSlot) {
@@ -153,6 +171,10 @@ private void replaceStaleEntry(ThreadLocal<?> key, Object value, int staleSlot) 
 
 #### 4. expungeStaleEntry删除陈旧的key
 
+根据传入的下标位置进行向后环形搜索；
+
+当探索过程中entry不为空时，会判断当前entry的key是否为空，如果为空则代表不在使用，进行删除；不为空则会获取它原本在数组中的位置，与当前位置进行判断，如果与原位置不相同，则置空当前位置，最好情况还原到该出现的位置，否则向后探索空位进行插入，优化查询效率；
+
 ```java
 private int expungeStaleEntry(int staleSlot) {
     Entry[] tab = table;
@@ -189,6 +211,8 @@ private int expungeStaleEntry(int staleSlot) {
 ```
 
 #### 5. cleanSomeSlots清理为空的key
+
+从当前位置向后环形扫描，在(n >>>= 1) != 0的范围次数内找到key为null的位置，进行删除并重置扫描次数与扫描位置。
 
 ```java
 private boolean cleanSomeSlots(int i, int n) {
@@ -332,3 +356,8 @@ ThreadLocalMap本身并没有为外界提供取出和存放数据的API，我们
 
 ## 六、ThreadLocal内存泄漏原因
 
+对于ThreadLocalMap而言时Thread的成员变量，如果线程结束则ThreadLocalMap也会被销毁，这种情况不存在内存泄漏；
+
+但是存在线程复用(线程池)的情况下，ThreadLocalMap会永远存在Thread中，如果ThreadLocal被回收了，此时ThreadLocalMap中的key就为null，而value就无法被访问，造成了内存泄漏；
+
+在ThreadLocal中所有的set、get、remove方法都会检测数组中为null的key进行删除，但是还是推荐在使用了set方法后手动remove，防止内存泄漏。
