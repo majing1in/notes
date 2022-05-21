@@ -10,21 +10,21 @@ Java中I/O操作主要是指使用Java进行输入，输出操作。 Java所有�
 
 ## 二、IO分类
 
-![IO7](D:\notes\java-notes\资源\IO7.png)
+![IO7](D:\notes\Java笔记\资源\IO7.png)
 
 ### 2.1、根据流向分为输入流和输出流
 
 输出：把程序(内存)中的内容输出到磁盘、光盘等存储设备中
 
-![IO1](D:\notes\java-notes\资源\IO1.png)
+![IO1](D:\notes\Java笔记\资源\IO1.png)
 
 输入：读取外部数据（磁盘、光盘等存储设备的数据）到程序（内存）中
 
-![IO2](D:\notes\java-notes\资源\IO2.png)
+![IO2](D:\notes\Java笔记\资源\IO2.png)
 
 综合起来：
 
-![IO3](D:\notes\java-notes\资源\IO3.png)
+![IO3](D:\notes\Java笔记\资源\IO3.png)
 
 ### 2.2、根据传输数据单位分为字节流和字符流
 
@@ -43,11 +43,11 @@ Java中I/O操作主要是指使用Java进行输入，输出操作。 Java所有�
 
 ### 3.1、File 类的字段
 
-![IO4](D:\notes\java-notes\资源\IO4.png)
+![IO4](D:\notes\Java笔记\资源\IO4.png)
 
 ### 3.2、File 构造方法
 
-![IO5](D:\notes\java-notes\资源\IO5.png)
+![IO5](D:\notes\Java笔记\资源\IO5.png)
 
 ### 3.3、File 类的常用方法
 
@@ -109,7 +109,7 @@ String[] list(FilenameFilter filter) 返回一个字符串数组，命名由此�
 
 在操作流的时候通常都会定义一个字节或字符数组，将读取/写入的数据先存放到这个数组里面，然后在取数组里面的数据。这比我们一个一个的读取/写入数据要快很多，而这也就是缓冲流的由来。只不过缓冲流里面定义了一个 数组用来存储我们读取/写入的数据，当内部定义的数组满了（注意：我们操作的时候外部还是会定义一个小的数组，小数组放入到内部数组中），就会进行下一步操作。
 
-![IO8](D:\notes\java-notes\资源\IO8.png)
+![IO8](D:\notes\Java笔记\资源\IO8.png)
 
 ### 6.2、转换流：把字节流转换为字符流
 
@@ -162,7 +162,7 @@ try {
 
 ### 8.1、构造方法
 
-![IO9](D:\notes\java-notes\资源\IO9.png)
+![IO9](D:\notes\Java笔记\资源\IO9.png)
 
 "r" :    以只读方式打开。调用结果对象的任何 write 方法都将导致抛出 IOException。
  "rw":    打开以便读取和写入。

@@ -75,7 +75,7 @@
 2. 进一步分析，如果不采用2的幂次方作为长度，则会浪费很大空间，例如以length=15为例，在1、3、5、7、9、11、13、15这八处不会存放数据，因为hashcode值在与14（即1110）进行&与运算时，得到的结果最后一位永远都是0，即0001、0011、0101、0111、1001、1011、1101、1111位置处是不可能存储数据的。
 3. 在数组进行扩容的时候也充分使用了length为2次方幂的特性，在length等于16（即10000）的时候第1位是作为扩容的标准，它可以保证首位以后的数都为0，当第一位做&操作为1的时候就进行移动，否则不移动。
 
-![HashMap-长度](D:\notes\java-notes\资源\HashMap-长度.png)
+![HashMap-长度](D:\notes\Java笔记\资源\HashMap-长度.png)
 
 HashMap构造函数允许用户传入的容量不是2的n次方，因为它可以自动地将传入的容量转换为2的n次方。会取大于或等于这个数的且最近的2次幂作为table数组的初始容量。
 
@@ -93,7 +93,7 @@ static final int tableSizeFor(int cap) {
 
 ### 四、HashMap的put方法流程
 
-![HashMap-流程](D:\notes\java-notes\资源\HashMap-流程.png)
+![HashMap-流程](D:\notes\Java笔记\资源\HashMap-流程.png)
 
 1. 首先根据key的值计算hash值，并用当前的hash值进行高16位于低16位的异或运算得到最终的hash值，当key为null时则直接取值为0；
 2. 当向map中存放元素的时候，如果使用默认的无参构造创建map，则会先对map进行初始化，则调用resize进行初始化；
