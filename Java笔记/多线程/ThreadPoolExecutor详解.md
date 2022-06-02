@@ -21,6 +21,10 @@
 
 ## 三、线程池中的位运算
 
+参考文档：
+
+> [JDK ThreadPoolExecutor核心原理与实践 - 掘金 (juejin.cn)](https://juejin.cn/post/7044787917885014052#heading-8)
+
 ThreadPoolExecutor 中有两个非常重要的参数：
 
 > 线程池状态（rs）以及活跃线程数（wc），前者用于标识当前线程池的状态，后者用于标识活跃线程数。
