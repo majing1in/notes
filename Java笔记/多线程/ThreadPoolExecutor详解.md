@@ -104,6 +104,38 @@ ctlOf(rs, wc)通过状态值和线程数值计算出 ctl 值。rs是runState的�
 
 
 
+## 四、线程流程分析
+
+
+
+```java
+public void execute(Runnable command) {
+    if (command == null)
+        throw new NullPointerException();
+    // c包含当前线程池的线程数和线程池状态
+    int c = ctl.get();
+    // 判断是否达到核心线程
+    if (workerCountOf(c) < corePoolSize) {
+        // 添加线程true
+        if (addWorker(command, true))
+            return;
+        // 更新状态c
+        c = ctl.get();
+    }
+    // 先判断线程池状态是否存活，并添加到队列中
+    if (isRunning(c) && workQueue.offer(command)) {
+        int recheck = ctl.get();
+        if (!isRunning(recheck) && remove(command))
+            reject(command);
+        else if (workerCountOf(recheck) == 0)
+            addWorker(null, false);
+    }
+    // 执行拒绝策略
+    else if (!addWorker(command, false))
+        reject(command);
+}
+```
+
 
 
 
