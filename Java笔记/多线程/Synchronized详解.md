@@ -123,8 +123,6 @@ Java SE 1.6 为了减少获得锁和释放锁带来的性能消耗，引入了�
 
 > [synchronized原理及优化 - 简书 (jianshu.com)](https://www.jianshu.com/p/435c20a64da1)
 
-
-
 ## 三、原子操作的实现原理
 
 原子（atomic）本意是“不能被进一步分割的最小粒子”，而原子操作（atomic  operation）意为“不可被中断的一个或一系列操作”。在多处理器上实现原子操作就变得有点复杂。

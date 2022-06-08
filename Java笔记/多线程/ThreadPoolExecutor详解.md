@@ -112,14 +112,14 @@ ctlOf(rs, wc)通过状态值和线程数值计算出 ctl 值。rs是runState的�
 public void execute(Runnable command) {
     if (command == null)
         throw new NullPointerException();
-    // c包含当前线程池的线程数和线程池状态
+    // ctl包含当前线程池的线程数和线程池状态
     int c = ctl.get();
     // 判断是否达到核心线程
     if (workerCountOf(c) < corePoolSize) {
         // 添加线程true
         if (addWorker(command, true))
             return;
-        // 更新状态c
+        // 更新状态ctl
         c = ctl.get();
     }
     // 先判断线程池状态是否存活，并添加到队列中
