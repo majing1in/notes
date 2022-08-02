@@ -33,7 +33,7 @@ ThreadPoolExecutor 用一个 Integer 变量（ctl）来设置这两个参数。
 
 Java中的 Integer 变量都是32位，ThreadPoolExecutor 使用前3位（31~29）表示线程池状态，用后29位（28~0）表示活跃线程数。
 
-![tpe](D:\notes\Java笔记\资源\tpe.jpg)
+![tpe](D:\notes\Java\资源\tpe.jpg)
 
 ThreadPoolExecutor 关于状态初始化的源码如下：
 
@@ -48,7 +48,7 @@ private static final int CAPACITY   = (1 << COUNT_BITS) - 1;
 
 CAPACITY转化方式：
 
-![tpe2](D:\notes\Java笔记\资源\tpe2.jpg)
+![tpe2](D:\notes\Java\资源\tpe2.jpg)
 
 线程池状态初始化：
 
@@ -62,7 +62,7 @@ private static final int TERMINATED =  3 << COUNT_BITS;
 
 这5个状态的计算过程如下图所示，经过移位计算后，数值的后29位全为0，前3位分别代表不同的状态。
 
-![tpe3](D:\notes\Java笔记\资源\tpe3.jpg)
+![tpe3](D:\notes\Java\资源\tpe3.jpg)
 
 ### 3.1 runStateOf(c)方法
 
@@ -74,7 +74,7 @@ private static int runStateOf(int c) {
 
 runStateOf() 方法是用于获取线程池状态的方法，其中形参 c 一般是 ctl 变量，包含了状态和线程数，runStateOf()移位计算的过程如下图所示。
 
-![tpe4](D:\notes\Java笔记\资源\tpe4.jpg)
+![tpe4](D:\notes\Java\资源\tpe4.jpg)
 
 CAPACITY 取反后高三位置1，低29位置0。取反后的值与 ctl 进行 ‘与’ 操作。由于任何值 ‘与’ 1等于原值，‘与’ 0等于0。因此 ‘与’ 操作过后，ctl 的高3位保留原值，低29位置0，这样就将状态值从 ctl 中分离出来。
 
@@ -88,7 +88,7 @@ private static int workerCountOf(int c) {
 
 workerCountOf(c) 方法的分析思路与上述类似，就是把后29位从ctl中分离出来，获得活跃线程数，如下图所示。
 
-![tpe5](D:\notes\Java笔记\资源\tpe5.jpg)
+![tpe5](D:\notes\Java\资源\tpe5.jpg)
 
 ### 3.3 ctlOf(rs, wc)方法
 
@@ -100,7 +100,7 @@ private static int ctlOf(int rs, int wc) {
 
 ctlOf(rs, wc)通过状态值和线程数值计算出 ctl 值。rs是runState的缩写，wc是workerCount的缩写。rs的后29位为0，wc的前三位为0，两者通过 ‘或’ 操作计算出来的最终值同时保留了rs的前3位和wc的后29位，即 ctl 值。
 
-![tpe6](D:\notes\Java笔记\资源\tpe6.jpg)
+![tpe6](D:\notes\Java\资源\tpe6.jpg)
 
 
 

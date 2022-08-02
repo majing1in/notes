@@ -15,7 +15,7 @@
 
 ### 1.2、基本工作机制
 
-![1](D:\notes\Java笔记\资源\1.jpg)
+![1](D:\notes\Java\资源\1.jpg)
 
 1. 当多个线程同时访问一段同步代码块时，首先会进入到_entryList队列中；
 2. 当某个线程获取到对象的Monitor后进入临界区域，并把Monitor中的_owner变量设置为当前线程，同时Monitor中的计数器\_count加1，即获得对象锁；
@@ -23,7 +23,7 @@
 4. 在_waitSet集合中的线程会被再次放到\_entryList队列中，重新竞争获取锁；
 5. 若当前线程执行完毕后也将释放Monitor并复位变量的值，以便其它线程进入获取锁。
 
-![2](D:\notes\Java笔记\资源\2.jpg)
+![2](D:\notes\Java\资源\2.jpg)
 
 ObjectMonitor::enter() 和 ObjectMonitor::exit() 分别是ObjectMonitor获取锁和释放锁的方法。
 
@@ -31,7 +31,7 @@ ObjectMonitor::enter() 和 ObjectMonitor::exit() 分别是ObjectMonitor获取锁
 
 #### 1.2.1、ObjectMonitor::enter()方法流程
 
-![3](D:\notes\Java笔记\资源\3.jpg)
+![3](D:\notes\Java\资源\3.jpg)
 
 1. 首先尝试通过 CAS 把 ObjectMonitor 中的 _owner 设置为当前线程，设置成功就表示获取锁成功，通过 _recursions 的自增来表示重入；
 2. 如果没有CAS成功，那么就开始启动自适应自旋，自旋还不行的话，就包装成 ObjectWaiter 对象加入到 _cxq 单向链表之中；
@@ -39,7 +39,7 @@ ObjectMonitor::enter() 和 ObjectMonitor::exit() 分别是ObjectMonitor获取锁
 
 #### 1.2.2、ObjectMonitor::exit()方法流程
 
-![4](D:\notes\Java笔记\资源\4.jpg)
+![4](D:\notes\Java\资源\4.jpg)
 
 1. 线程执行Object.wait()方法时，会将当前线程加入到 _waitSet 这个双向链表中，然后再运行ObjectMonitor::exit() 方法来释放锁；
 2. 可重入锁就是根据 _recursions 来判断的，重入一次就执行 _recursions++，解锁一次就执行 _recursions--，如果 _recursions 减到 0 ，就说明需要释放锁了；
@@ -59,21 +59,21 @@ Synchronized 用的锁是存在 Java 对象头里的。
 
 在 32 位虚拟机中，1 字宽等于 4 字节，即 32bit，如图所示：
 
-![10](D:\notes\Java笔记\资源\10.png)
+![10](D:\notes\Java\资源\10.png)
 
 Java 对象头里的 Mark Word 里默认存储对象的 HashCode、分代年龄和锁标记位。
 
 32 位 JVM 的 Mark Word 的默认存储结构如图所示：
 
-![11](D:\notes\Java笔记\资源\11.png)
+![11](D:\notes\Java\资源\11.png)
 
 Mark Word 可能变化为存储以下 4 种数据，如表图所示：
 
-![12](D:\notes\Java笔记\资源\12.png)
+![12](D:\notes\Java\资源\12.png)
 
 在 64 位虚拟机下，Mark Word 是 64bit 大小的，其存储结构图所示：
 
-![13](D:\notes\Java笔记\资源\13.png)
+![13](D:\notes\Java\资源\13.png)
 
 ### 2.2、锁的升级
 
@@ -103,7 +103,7 @@ Java SE 1.6 为了减少获得锁和释放锁带来的性能消耗，引入了�
 
 #### 2.2.2、轻量级锁
 
-![14](D:\notes\Java笔记\资源\14.png)
+![14](D:\notes\Java\资源\14.png)
 
 **轻量级锁加锁**
 
@@ -117,7 +117,7 @@ Java SE 1.6 为了减少获得锁和释放锁带来的性能消耗，引入了�
 
 **锁的优缺点对比**
 
-![15](D:\notes\Java笔记\资源\15.png)
+![15](D:\notes\Java\资源\15.png)
 
 ### 2.3、实现原理
 
@@ -129,7 +129,7 @@ Java SE 1.6 为了减少获得锁和释放锁带来的性能消耗，引入了�
 
 ### 3.1、术语定义
 
-![16](D:\notes\Java笔记\资源\16.png)
+![16](D:\notes\Java\资源\16.png)
 
 ### 3.2、处理器如何实现原子操作
 
@@ -137,7 +137,7 @@ Java SE 1.6 为了减少获得锁和释放锁带来的性能消耗，引入了�
 
 首先处理器会自动保证基本的内存操作的原子性，处理器保证从系统内存中读取或者写入一个字节是原子的，意思是当一个处理器读取一个字节时，其他处理器不能访问这个字节的内存地址。
 
-> D:\notes\操作系统笔记\文档\缓存一致性协议.md
+> D:\notes\操作系统\文档\缓存一致性协议.md
 
 #### 3.2.1、使用总线锁保证原子性
 

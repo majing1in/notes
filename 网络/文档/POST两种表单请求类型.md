@@ -8,7 +8,7 @@ https://juejin.cn/post/6844903810079391757
 
 浏览器的原生 form 表单，如果不设置 enctype 属性，那么最终就会以 application/x-www-form-urlencoded 方式提交数据。
 
-![Snipaste_2022-05-12_22-18-52](D:\notes\网络笔记\资源\Snipaste_2022-05-12_22-18-52.png)
+![Snipaste_2022-05-12_22-18-52](D:\notes\网络\资源\Snipaste_2022-05-12_22-18-52.png)
 
 首先 Content-Type 被指定为 application/x-www-form-urlencoded；其次，提交的数据按照 key1=val1&key2=val2 的方式进行编码，key 和 val 都进行了 URL 转码。
 
@@ -26,5 +26,5 @@ Urlencode的编码规则：取出字符的ASCII码，转成16进制，然后前�
 
 请求头里规定了Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryrGKCBY7qhFd3TrwA
 
-![Snipaste_2022-05-12_22-16-04](D:\notes\网络笔记\资源\Snipaste_2022-05-12_22-16-04.png)
+![Snipaste_2022-05-12_22-16-04](D:\notes\网络\资源\Snipaste_2022-05-12_22-16-04.png)
 

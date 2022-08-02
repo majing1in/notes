@@ -342,7 +342,7 @@ private void resize() {
 
 https://zhuanlan.zhihu.com/p/139214244
 
-![ThreadLocal_1](D:\notes\java-notes\资源\ThreadLocal_1.png)
+![ThreadLocal_1](D:\notes\java\资源\ThreadLocal_1.png)
 
 总的来说Threadlocal的设计是对线程本地变量的操作，将线程本地变量与维护的关系进行了分离，直接使用定义的ThreadLocal即可，所以Thread没有直接对ThreadlocalMap操作的方法；
 
